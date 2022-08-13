@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="TaxiDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ClientsSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="First_Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Last_Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Telephone_number" Type="int" Nullable="false" />
+          <Property Name="Rate_index" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DriversSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="First_Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Last_Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateOfBirth" Type="datetime" Nullable="false" />
+          <Property Name="Photo" Type="varbinary(max)" />
+          <Property Name="Rate_index" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="OrderSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Address_from" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Address_to" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Order_time" Type="datetime" Nullable="false" />
+          <Property Name="Order_cost" Type="float" Nullable="false" />
+          <Property Name="Order_status" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="ClientsId" Type="int" Nullable="false" />
+          <Property Name="DriversId" Type="int" />
+          <Property Name="VehicleId" Type="int" />
+        </EntityType>
+        <EntityType Name="VehicleSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Manufacturer" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Model" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Production_date" Type="datetime" Nullable="false" />
+          <Property Name="Number" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Driver_Id" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_OrderClients">
+          <End Role="ClientsSet" Type="Self.ClientsSet" Multiplicity="1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ClientsSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="ClientsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderDrivers">
+          <End Role="DriversSet" Type="Self.DriversSet" Multiplicity="0..1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DriversSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="DriversId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VehicleDrivers">
+          <End Role="DriversSet" Type="Self.DriversSet" Multiplicity="1" />
+          <End Role="VehicleSet" Type="Self.VehicleSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DriversSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="VehicleSet">
+              <PropertyRef Name="Driver_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VehicleOrder">
+          <End Role="VehicleSet" Type="Self.VehicleSet" Multiplicity="0..1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VehicleSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="VehicleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="stp_Add_Driver" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="First_Name" Type="nvarchar" Mode="In" />
+          <Parameter Name="Last_Name" Type="nvarchar" Mode="In" />
+          <Parameter Name="DateOfBirth" Type="date" Mode="In" />
+          <Parameter Name="Photo" Type="binary" Mode="In" />
+          <Parameter Name="Rate_index" Type="int" Mode="In" />
+          <Parameter Name="Id" Type="int" Mode="InOut" />
+        </Function>
+        <Function Name="stp_Clients_Rate_LowerThat" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Rate" Type="int" Mode="In" />
+        </Function>
+        <Function Name="stp_Cost_by_Driver" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Id_driver" Type="int" Mode="In" />
+          <Parameter Name="Cost" Type="float" Mode="InOut" />
+        </Function>
+        <Function Name="stp_Order_by_date" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Order_time" Type="datetime" Mode="In" />
+        </Function>
+        <EntityContainer Name="TaxiDBModelStoreContainer">
+          <EntitySet Name="ClientsSet" EntityType="Self.ClientsSet" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DriversSet" EntityType="Self.DriversSet" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OrderSet" EntityType="Self.OrderSet" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="VehicleSet" EntityType="Self.VehicleSet" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_OrderClients" Association="Self.FK_OrderClients">
+            <End Role="ClientsSet" EntitySet="ClientsSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderDrivers" Association="Self.FK_OrderDrivers">
+            <End Role="DriversSet" EntitySet="DriversSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VehicleDrivers" Association="Self.FK_VehicleDrivers">
+            <End Role="DriversSet" EntitySet="DriversSet" />
+            <End Role="VehicleSet" EntitySet="VehicleSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VehicleOrder" Association="Self.FK_VehicleOrder">
+            <End Role="VehicleSet" EntitySet="VehicleSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="TaxiDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="ClientsSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="First_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Last_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Telephone_number" Type="Int32" Nullable="false" />
+          <Property Name="Rate_index" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="OrderSet" Relationship="Self.FK_OrderClients" FromRole="ClientsSet" ToRole="OrderSet" />
+        </EntityType>
+        <EntityType Name="DriversSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="First_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Last_Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DateOfBirth" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Photo" Type="Binary" MaxLength="Max" FixedLength="false" />
+          <Property Name="Rate_index" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="OrderSet" Relationship="Self.FK_OrderDrivers" FromRole="DriversSet" ToRole="OrderSet" />
+          <NavigationProperty Name="VehicleSet" Relationship="Self.FK_VehicleDrivers" FromRole="DriversSet" ToRole="VehicleSet" />
+        </EntityType>
+        <EntityType Name="OrderSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Address_from" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Address_to" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Order_time" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Order_cost" Type="Double" Nullable="false" />
+          <Property Name="Order_status" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ClientsId" Type="Int32" Nullable="false" />
+          <Property Name="DriversId" Type="Int32" />
+          <Property Name="VehicleId" Type="Int32" Nullable="true" />
+          <NavigationProperty Name="ClientsSet" Relationship="Self.FK_OrderClients" FromRole="OrderSet" ToRole="ClientsSet" />
+          <NavigationProperty Name="DriversSet" Relationship="Self.FK_OrderDrivers" FromRole="OrderSet" ToRole="DriversSet" />
+          <NavigationProperty Name="VehicleSet" Relationship="Self.FK_VehicleOrder" FromRole="OrderSet" ToRole="VehicleSet" />
+        </EntityType>
+        <EntityType Name="VehicleSet">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Manufacturer" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Model" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Production_date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Number" Type="String" MaxLength="10" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Driver_Id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="DriversSet" Relationship="Self.FK_VehicleDrivers" FromRole="VehicleSet" ToRole="DriversSet" />
+          <NavigationProperty Name="OrderSet" Relationship="Self.FK_VehicleOrder" FromRole="VehicleSet" ToRole="OrderSet" />
+        </EntityType>
+        <Association Name="FK_OrderClients">
+          <End Role="ClientsSet" Type="Self.ClientsSet" Multiplicity="1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ClientsSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="ClientsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_OrderDrivers">
+          <End Role="DriversSet" Type="Self.DriversSet" Multiplicity="0..1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DriversSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="DriversId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VehicleDrivers">
+          <End Role="DriversSet" Type="Self.DriversSet" Multiplicity="1" />
+          <End Role="VehicleSet" Type="Self.VehicleSet" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="DriversSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="VehicleSet">
+              <PropertyRef Name="Driver_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_VehicleOrder">
+          <End Role="VehicleSet" Type="Self.VehicleSet" Multiplicity="0..1" />
+          <End Role="OrderSet" Type="Self.OrderSet" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VehicleSet">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="OrderSet">
+              <PropertyRef Name="VehicleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="TaxiDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ClientsSet" EntityType="Self.ClientsSet" />
+          <EntitySet Name="DriversSet" EntityType="Self.DriversSet" />
+          <EntitySet Name="OrderSet" EntityType="Self.OrderSet" />
+          <EntitySet Name="VehicleSet" EntityType="Self.VehicleSet" />
+          <AssociationSet Name="FK_OrderClients" Association="Self.FK_OrderClients">
+            <End Role="ClientsSet" EntitySet="ClientsSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_OrderDrivers" Association="Self.FK_OrderDrivers">
+            <End Role="DriversSet" EntitySet="DriversSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VehicleDrivers" Association="Self.FK_VehicleDrivers">
+            <End Role="DriversSet" EntitySet="DriversSet" />
+            <End Role="VehicleSet" EntitySet="VehicleSet" />
+          </AssociationSet>
+          <AssociationSet Name="FK_VehicleOrder" Association="Self.FK_VehicleOrder">
+            <End Role="VehicleSet" EntitySet="VehicleSet" />
+            <End Role="OrderSet" EntitySet="OrderSet" />
+          </AssociationSet>
+          <FunctionImport Name="stp_Add_Driver">
+            <Parameter Name="First_Name" Mode="In" Type="String" />
+            <Parameter Name="Last_Name" Mode="In" Type="String" />
+            <Parameter Name="DateOfBirth" Mode="In" Type="DateTime" />
+            <Parameter Name="Photo" Mode="In" Type="Binary" />
+            <Parameter Name="Rate_index" Mode="In" Type="Int32" />
+            <Parameter Name="Id" Mode="InOut" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="stp_Clients_Rate_LowerThat" ReturnType="Collection(TaxiDBModel.stp_Clients_Rate_LowerThat_Result)">
+            <Parameter Name="Rate" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="stp_Cost_by_Driver">
+            <Parameter Name="Id_driver" Mode="In" Type="Int32" />
+            <Parameter Name="Cost" Mode="InOut" Type="Double" />
+          </FunctionImport>
+          <FunctionImport Name="stp_Order_by_date" ReturnType="Collection(TaxiDBModel.stp_Order_by_date_Result)">
+            <Parameter Name="Order_time" Mode="In" Type="DateTime" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="stp_Clients_Rate_LowerThat_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="First_Name" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="Last_Name" Nullable="true" MaxLength="50" />
+          <Property Type="Int32" Name="Telephone_number" Nullable="false" />
+          <Property Type="Int32" Name="Rate_index" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="stp_Order_by_date_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Address_from" Nullable="false" />
+          <Property Type="String" Name="Address_to" Nullable="false" />
+          <Property Type="DateTime" Name="Order_time" Nullable="false" Precision="23" />
+          <Property Type="Double" Name="Order_cost" Nullable="false" />
+          <Property Type="String" Name="Order_status" Nullable="false" MaxLength="30" />
+          <Property Type="Int32" Name="ClientsId" Nullable="false" />
+          <Property Type="Int32" Name="DriversId" Nullable="true" />
+          <Property Type="Int32" Name="VehicleId" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="TaxiDBModelStoreContainer" CdmEntityContainer="TaxiDBEntities">
+          <EntitySetMapping Name="ClientsSet">
+            <EntityTypeMapping TypeName="TaxiDBModel.ClientsSet">
+              <MappingFragment StoreEntitySet="ClientsSet">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="First_Name" ColumnName="First_Name" />
+                <ScalarProperty Name="Last_Name" ColumnName="Last_Name" />
+                <ScalarProperty Name="Telephone_number" ColumnName="Telephone_number" />
+                <ScalarProperty Name="Rate_index" ColumnName="Rate_index" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DriversSet">
+            <EntityTypeMapping TypeName="TaxiDBModel.DriversSet">
+              <MappingFragment StoreEntitySet="DriversSet">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="First_Name" ColumnName="First_Name" />
+                <ScalarProperty Name="Last_Name" ColumnName="Last_Name" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="Photo" ColumnName="Photo" />
+                <ScalarProperty Name="Rate_index" ColumnName="Rate_index" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OrderSet">
+            <EntityTypeMapping TypeName="TaxiDBModel.OrderSet">
+              <MappingFragment StoreEntitySet="OrderSet">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Address_from" ColumnName="Address_from" />
+                <ScalarProperty Name="Address_to" ColumnName="Address_to" />
+                <ScalarProperty Name="Order_time" ColumnName="Order_time" />
+                <ScalarProperty Name="Order_cost" ColumnName="Order_cost" />
+                <ScalarProperty Name="Order_status" ColumnName="Order_status" />
+                <ScalarProperty Name="ClientsId" ColumnName="ClientsId" />
+                <ScalarProperty Name="DriversId" ColumnName="DriversId" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VehicleSet">
+            <EntityTypeMapping TypeName="TaxiDBModel.VehicleSet">
+              <MappingFragment StoreEntitySet="VehicleSet">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Manufacturer" ColumnName="Manufacturer" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="Production_date" ColumnName="Production_date" />
+                <ScalarProperty Name="Number" ColumnName="Number" />
+                <ScalarProperty Name="Driver_Id" ColumnName="Driver_Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="stp_Add_Driver" FunctionName="TaxiDBModel.Store.stp_Add_Driver" />
+          <FunctionImportMapping FunctionImportName="stp_Clients_Rate_LowerThat" FunctionName="TaxiDBModel.Store.stp_Clients_Rate_LowerThat">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="TaxiDBModel.stp_Clients_Rate_LowerThat_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="First_Name" ColumnName="First_Name" />
+                <ScalarProperty Name="Last_Name" ColumnName="Last_Name" />
+                <ScalarProperty Name="Telephone_number" ColumnName="Telephone_number" />
+                <ScalarProperty Name="Rate_index" ColumnName="Rate_index" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="stp_Cost_by_Driver" FunctionName="TaxiDBModel.Store.stp_Cost_by_Driver" />
+          <FunctionImportMapping FunctionImportName="stp_Order_by_date" FunctionName="TaxiDBModel.Store.stp_Order_by_date">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="TaxiDBModel.stp_Order_by_date_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Address_from" ColumnName="Address_from" />
+                <ScalarProperty Name="Address_to" ColumnName="Address_to" />
+                <ScalarProperty Name="Order_time" ColumnName="Order_time" />
+                <ScalarProperty Name="Order_cost" ColumnName="Order_cost" />
+                <ScalarProperty Name="Order_status" ColumnName="Order_status" />
+                <ScalarProperty Name="ClientsId" ColumnName="ClientsId" />
+                <ScalarProperty Name="DriversId" ColumnName="DriversId" />
+                <ScalarProperty Name="VehicleId" ColumnName="VehicleId" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
